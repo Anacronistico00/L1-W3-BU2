@@ -1,12 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace L1_W3_BU2.Models
+namespace L1_W3_BU2.DTOs.Student
 {
-    public class Student
+    public class CreateStudentRequestDto
     {
-        [Key]
-        public Guid Id { get; set; }
-
         [Required]
         [StringLength(50)]
         public required string Name { get; set; }
@@ -23,6 +20,5 @@ namespace L1_W3_BU2.Models
 
         public DateTime? Updated { get; set; }
 
-        public StudentProfile Profile { get; set; }
     }
 }

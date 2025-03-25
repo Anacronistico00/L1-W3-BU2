@@ -10,5 +10,6 @@ namespace L1_W3_BU2.Data
         }
 
         public DbSet<Student> Students { get; set; }
+        public DbSet<StudentProfile> StudentsProfiles { get; set; }
     }
 }
