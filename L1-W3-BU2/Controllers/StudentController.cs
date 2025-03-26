@@ -54,33 +54,40 @@ namespace L1_W3_BU2.Controllers
         [HttpGet]
         public async Task<IActionResult> GetStudents()
         {
-            var studentsList = await _studentService.GetStudentsAsync();
-
-            _logger.LogInformation($"Requesting students info: {JsonSerializer.Serialize(studentsList, new JsonSerializerOptions() { WriteIndented = true })}");
-
-            if (studentsList == null)
+            try
             {
-                return BadRequest(new
+                List<Student> Students = await _studentService.GetStudentsAsync();
+
+                if(Students == null)
                 {
-                    message = "Failed to get students!!!"
+                    return BadRequest(new GetAllStudentsResponse()
+                {
+                        Message = "Something went wrong",
+                        Students = null
+                });
                 }
-                );
+
+                if(!Students.Any())
+                {
+                    return NotFound(new GetAllStudentsResponse()
+                    {
+                        Message = "No students found!",
+                        Students = null
+                    });
+                }
+
+                var StudentsDto = await _studentService.GetStudentsDtoAsync(Students);
+
+                return Ok(new GetAllStudentsResponse()
+                {
+                    Message = "Product correctly get",
+                    Students = StudentsDto 
+                });
             }
-
-            if (!studentsList.Any())
+            catch (Exception ex)
             {
-                return NoContent();
+                return StatusCode(500, ex.Message);
             }
-
-            var count = studentsList.Count();
-
-            var textMessage = count > 1 ? $"{count} Studenti trovati" : $"{count} Studente trovato";
-
-            return Ok(new
-            {
-                message = textMessage,
-                students = studentsList
-            });
         }
 
         [HttpGet("{id:guid}")]
@@ -112,46 +119,14 @@ namespace L1_W3_BU2.Controllers
             });
         }
 
-        [HttpPut]
-        public async Task<IActionResult> UpdateStudent([FromQuery] Guid id, [FromBody] CreateStudentRequestDto student)
+        [HttpPut("{id:guid}")]
+        public async Task<IActionResult> UpdateStudent(Guid id, [FromBody] UpdateStudentRequestDto studentDto)
         {
-            var studentToUpdate = await _studentService.updateStudentAsync(student);
+            // Passa l'ID insieme al DTO per aggiornare lo studente
+            var result = await _studentService.UpdateStudentAsync(id, studentDto);
 
-            var result = await _studentService.UpdateStudentAsync(id, studentToUpdate);
-
-            return result ? Ok(new UpdateStudentResponseDto()
-            {
-                Message = "Student correctly updated!",
-            }) : BadRequest(new UpdateStudentResponseDto()
-            {
-                Message = "Something went wrong!"
-            });
-        }
-
-        [HttpPost("StudentProfile")]
-        public async Task<IActionResult> CreateStudentProfile([FromQuery] Guid id, [FromBody] CreateStudentProfileRequestDto student)
-        {
-            var newStudentProfile = await _studentService.CreateStudentProfileAsync(student, id);
-
-            if (newStudentProfile == null)
-            {
-                return BadRequest(new
-                {
-                    message = "Failed to create a new student Profile!!!"
-                }
-                );
-            }
-
-            var result = await _studentService.AddStudentProfileAsync(newStudentProfile);
-
-
-            return result ? Ok(new CreateStudentProfileResponseDto()
-            {
-                Message = "Student Profile correctly added!",
-            }) : BadRequest(new CreateStudentProfileResponseDto()
-            {
-                Message = "Something went wrong!"
-            });
+            return result ? Ok(new { Message = "Student correctly updated!" })
+                          : BadRequest(new { Message = "Something went wrong!" });
         }
     }
 }

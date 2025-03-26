@@ -20,5 +20,12 @@ namespace L1_W3_BU2.DTOs.Student
 
         public DateTime? Updated { get; set; }
 
+        [Required]
+        [StringLength(25)]
+        public required string FiscalCode { get; set; }
+
+        [Required]
+        public required DateTime BirthDate { get; set; }
+
     }
 }

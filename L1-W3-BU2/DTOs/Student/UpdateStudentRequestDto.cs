@@ -19,9 +19,16 @@ namespace L1_W3_BU2.DTOs.Student
         [EmailAddress]
         public required string Email { get; set; }
 
-        public DateTime Created { get; set; }
+        public DateTime Created { get; init; }  // Non modificabile
 
-        public DateTime? Updated { get; set; } = DateTime.Now;
+        public DateTime Updated { get; set; } = DateTime.Now;
+
+        [Required]
+        [StringLength(25)]
+        public required string FiscalCode { get; set; }
+
+        [Required]
+        public required DateTime BirthDate { get; set; }
 
     }
 }

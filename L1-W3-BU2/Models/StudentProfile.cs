@@ -27,7 +27,6 @@ namespace L1_W3_BU2.Models
         public Guid StudentId { get; set; }
 
         [ForeignKey("StudentId")]
-        [JsonIgnore]
         public Student Student { get; set; }
     }
 }

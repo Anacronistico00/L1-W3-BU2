@@ -3,6 +3,7 @@ using L1_W3_BU2.DTOs.Student;
 using L1_W3_BU2.DTOs.StudentProfile;
 using L1_W3_BU2.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 
 namespace L1_W3_BU2.Services
 {
@@ -41,6 +42,13 @@ namespace L1_W3_BU2.Services
                     Email = student.Email,
                     Created = student.Created,
                     Updated = student.Updated,
+                    Profile = new StudentProfile()
+                    {
+                        FirstName = student.Name,
+                        LastName = student.Surname,
+                        FiscalCode = student.FiscalCode,
+                        BirthDate = student.BirthDate
+                    }
                 };
                 return newStudent;
             }
@@ -51,27 +59,7 @@ namespace L1_W3_BU2.Services
             }
         }
 
-        public async Task<Student?> updateStudentAsync(CreateStudentRequestDto student)
-        {
-            try
-            {
-                var newStudent = new Student()
-                {
-                    Name = student.Name,
-                    Surname = student.Surname,
-                    Email = student.Email,
-                    Created = student.Created,
-                    Updated = student.Updated,
-                };
-                return newStudent;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ex.Message);
-                return null;
-            }
-        }
-
+        
         public async Task<bool> AddStudentAsync(Student student)
         {
             try
@@ -86,11 +74,42 @@ namespace L1_W3_BU2.Services
             }
         }
 
-        public async Task<List<Student>?> GetStudentsAsync()
+        public async Task<List<Student>> GetStudentsAsync()
         {
             try
             {
                 return await _context.Students.Include(s => s.Profile).ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return null;
+            }
+        }
+
+        public async Task<List<StudentDto>?> GetStudentsDtoAsync(List<Student> students)
+        {
+            try
+            {
+                List<StudentDto> StudentsDto = students.Select(s =>
+                    new StudentDto()
+                    {
+                        Id = s.Id,
+                        Name = s.Name,
+                        Surname = s.Surname,
+                        Email = s.Email,
+                        Created = s.Created,
+                        Updated = s.Updated,
+                        Profile = new StudentProfileDto()
+                        {
+                            FirstName = s.Name,
+                            LastName = s.Surname,
+                            FiscalCode = s.Profile.FiscalCode,
+                            BirthDate = s.Profile.BirthDate
+                        }
+                    }
+                ).ToList();
+                return StudentsDto;
             }
             catch (Exception ex)
             {
@@ -112,13 +131,45 @@ namespace L1_W3_BU2.Services
             }
         }
 
+        public async Task<StudentDto?> GetStudentDtoByIdAsync(Guid id)
+        {
+            try
+            {
+                var student = await _context.Students.Include(s => s.Profile).FirstOrDefaultAsync(s => s.Id == id);
+
+                var studentDto = new StudentDto()
+                {
+                    Id = student.Id,
+                    Name = student.Name,
+                    Surname = student.Surname,
+                    Email = student.Email,
+                    Created = student.Created,
+                    Updated = student.Updated,
+                    Profile = new StudentProfileDto()
+                    {
+                        FirstName = student.Name,
+                        LastName = student.Surname,
+                        FiscalCode = student.Profile.FiscalCode,
+                        BirthDate = student.Profile.BirthDate
+                    }
+                };
+
+                return studentDto;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return null;
+            }
+        }
+
         public async Task<bool> DeleteStudentAsync(Guid id)
         {
             try
             {
                 var existingStudent = await GetStudentByIdAsync(id);
 
-                if(existingStudent == null)
+                if (existingStudent == null)
                 {
                     return false;
                 }
@@ -133,7 +184,35 @@ namespace L1_W3_BU2.Services
             }
         }
 
-        public async Task<bool> UpdateStudentAsync(Guid id, Student student)
+        public async Task<Student?> UpdateStudentDtoAsync(UpdateStudentRequestDto student)
+        {
+            try
+            {
+                var newStudent = new Student()
+                {
+                    Name = student.Name,
+                    Surname = student.Surname,
+                    Email = student.Email,
+                    Created = student.Created,
+                    Updated = student.Updated,
+                    Profile = new StudentProfile()
+                    {
+                        FirstName = student.Name,
+                        LastName = student.Surname,
+                        FiscalCode = student.FiscalCode,
+                        BirthDate = student.BirthDate
+                    }
+                };
+                return newStudent;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return null;
+            }
+        }
+
+        public async Task<bool> UpdateStudentAsync(Guid id, UpdateStudentRequestDto studentDto)
         {
             try
             {
@@ -144,47 +223,20 @@ namespace L1_W3_BU2.Services
                     return false;
                 }
 
-                existingStudent.Name = student.Name;
-                existingStudent.Surname = student.Surname;
-                existingStudent.Email = student.Email;
+                existingStudent.Name = studentDto.Name;
+                existingStudent.Surname = studentDto.Surname;
+                existingStudent.Email = studentDto.Email;
                 existingStudent.Updated = DateTime.Now;
-                return await SaveAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ex.Message);
-                return false;
-            }
-        }
 
-        public async Task<StudentProfile?> CreateStudentProfileAsync(CreateStudentProfileRequestDto studentProfile, Guid id)
-        {
-            try
-            {
-                var newStudentProfile = new StudentProfile()
+                if (existingStudent.Profile != null)
                 {
-                    FirstName = studentProfile.FirstName,
-                    LastName = studentProfile.LastName,
-                    FiscalCode = studentProfile.FiscalCode,
-                    BirthDate = studentProfile.BirthDate,
-                    StudentId = id,
-                };
+                    existingStudent.Profile.FirstName = studentDto.Name;
+                    existingStudent.Profile.LastName = studentDto.Surname;
+                    existingStudent.Profile.FiscalCode = studentDto.FiscalCode;
+                    existingStudent.Profile.BirthDate = studentDto.BirthDate;
+                }
 
-                return newStudentProfile;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ex.Message);
-                return null;
-            }
-        }
-
-        public async Task<bool> AddStudentProfileAsync(StudentProfile studentProfile)
-        {
-            try
-            {
-                _context.StudentsProfiles.Add(studentProfile);
-                return await SaveAsync();
+                return await _context.SaveChangesAsync() > 0;
             }
             catch (Exception ex)
             {
@@ -194,3 +246,4 @@ namespace L1_W3_BU2.Services
         }
     }
 }
+

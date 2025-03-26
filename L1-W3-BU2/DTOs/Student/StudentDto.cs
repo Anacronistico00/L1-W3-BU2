@@ -1,12 +1,12 @@
-﻿using L1_W3_BU2.DTOs.Student;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using L1_W3_BU2.DTOs.StudentProfile;
 
-namespace L1_W3_BU2.Models
+namespace L1_W3_BU2.DTOs.Student
 {
-    public class Student
+    public class StudentDto
     {
-        [Key]
+        [Required]
         public Guid Id { get; set; }
 
         [Required]
@@ -25,7 +25,6 @@ namespace L1_W3_BU2.Models
 
         public DateTime? Updated { get; set; }
 
-        [InverseProperty("Student")]
-        public StudentProfile Profile { get; set; }
+        public StudentProfileDto Profile { get; set; }
     }
 }

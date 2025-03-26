@@ -2,9 +2,8 @@
 
 namespace L1_W3_BU2.DTOs.StudentProfile
 {
-    public class CreateStudentProfileRequestDto
+    public class StudentProfileDto
     {
-
         [Required]
         [StringLength(25)]
         public required string FirstName { get; set; }
@@ -19,6 +18,5 @@ namespace L1_W3_BU2.DTOs.StudentProfile
 
         [Required]
         public required DateTime BirthDate { get; set; }
-        public Guid StudentId { get; set; }
     }
 }
