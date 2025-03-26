@@ -3,6 +3,7 @@ using L1_W3_BU2.DTOs.Student;
 using L1_W3_BU2.DTOs.StudentProfile;
 using L1_W3_BU2.Models;
 using L1_W3_BU2.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -26,6 +27,7 @@ namespace L1_W3_BU2.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddStudent([FromBody] CreateStudentRequestDto student)
         {
             var newStudent = await _studentService.createStudentAsync(student);
@@ -52,6 +54,7 @@ namespace L1_W3_BU2.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetStudents()
         {
             try
@@ -91,6 +94,7 @@ namespace L1_W3_BU2.Controllers
         }
 
         [HttpGet("{id:guid}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> getStudentById(Guid id)
         {
             var result = await _studentService.GetStudentByIdAsync(id);
@@ -106,6 +110,7 @@ namespace L1_W3_BU2.Controllers
         }
 
         [HttpDelete("{id:guid}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteStudent(Guid id)
         {
             var result = await _studentService.DeleteStudentAsync(id);
@@ -120,9 +125,9 @@ namespace L1_W3_BU2.Controllers
         }
 
         [HttpPut("{id:guid}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateStudent(Guid id, [FromBody] UpdateStudentRequestDto studentDto)
         {
-            // Passa l'ID insieme al DTO per aggiornare lo studente
             var result = await _studentService.UpdateStudentAsync(id, studentDto);
 
             return result ? Ok(new { Message = "Student correctly updated!" })
